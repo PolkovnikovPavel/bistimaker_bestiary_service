@@ -1,0 +1,13 @@
+version: '3.10'
+
+services:
+  bestiary_service:
+    build: .
+    container_name: bestiary_service
+    ports:
+      - "6100:6100"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://client:password@172.17.6.166:6000/bistimakerdb

@@ -1,0 +1,30 @@
+
+на винде:
+
+docker login
+docker-compose up -d
+docker tag bestiary_service-bestiary_service:latest setorg/bestiary_service:latest
+docker push setorg/bestiary_service:latest
+
+
+на сервере:
+
+docker ps
+docker stop bestiary_service
+docker container prune
+docker images
+docker pull setorg/bestiary_service:latest
+docker rmi fa813ed7c2bd
+
+docker run -d --name bestiary_service -p 6100:6100 setorg/bestiary_service:latest
+
+docker ps
+docker logs bestiary_service
+
+
+
+bestiary_service-bestiary_service
+
+
+
+
