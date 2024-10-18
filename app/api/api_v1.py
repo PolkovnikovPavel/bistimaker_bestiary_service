@@ -5,11 +5,25 @@ from sqlalchemy import and_, or_
 from app.api.models import *   # Модели Pydantic для валидации данных
 
 
-app_v1 = FastAPI()
+app_v1 = FastAPI(
+    title="bestiary API",
+    description='''\tRU:
+\t\tAPI предоставляет инструменты по стандарту CRUD для редактирования бестиариев, категорий существ и самих существ. Все изменения сохраняются в базе данных.
+
+\t\tУдаление бестиариев не стирает данные на совсем, но восстановить их с помощью API не возможно.
+___
+
+\tEN:
+\t\tThe API provides tools according to the CRUD standard for editing bestiaries, categories of entities and an entities. All changes are saved in the database.
+
+\t\tDeleting bestiaries does not erase the data at all, but it is impossible to restore them using this API.
+    ''',
+    version="1.0.1",
+)
 
 
 # Создание нового бестиария
-@app_v1.post("/bestiaries/", response_model=BestiariesOut)
+@app_v1.post("/bestiaries/", response_model=BestiariesOut, tags=["bestiaries"])
 def create_bestiary(bestiary: BestiariesCreate):
     db = SessionLocal()
     db_bestiary = Bestiaries(**bestiary.dict())
@@ -21,7 +35,7 @@ def create_bestiary(bestiary: BestiariesCreate):
 
 
 # Получение списка всех бестиариев для пользователя
-@app_v1.get("/bestiaries/", response_model=List[BestiariesOut])
+@app_v1.get("/bestiaries/", response_model=List[BestiariesOut], tags=["bestiaries"])
 def read_bestiaries(bestiary: BestiariesGetIn):
     db = SessionLocal()
     print(bestiary)
@@ -33,7 +47,7 @@ def read_bestiaries(bestiary: BestiariesGetIn):
 
 
 # Получение бестиария по ID
-@app_v1.get("/bestiaries/{bestiary_id}", response_model=BestiariesOut)
+@app_v1.get("/bestiaries/{bestiary_id}", response_model=BestiariesOut, tags=["bestiaries"])
 def read_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
     db = SessionLocal()
     db_bestiary = db.query(Bestiaries).filter(and_(Bestiaries.id == bestiary_id,
@@ -48,7 +62,7 @@ def read_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
 
 
 # Удаление бестиария по ID
-@app_v1.delete("/bestiaries/{bestiary_id}", response_model=BestiariesCreate)
+@app_v1.delete("/bestiaries/{bestiary_id}", response_model=BestiariesCreate, tags=["bestiaries"])
 def delete_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
     db = SessionLocal()
     db_bestiary = db.query(Bestiaries).filter(and_(Bestiaries.id == bestiary_id,
@@ -64,8 +78,8 @@ def delete_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
 
 
 # Изменение бестиария по ID
-@app_v1.put("/bestiaries/{bestiary_id}", response_model=BestiariesOut)
-def delete_bestiary(bestiary_id: int, bestiary: BestiariesUpdate):
+@app_v1.put("/bestiaries/{bestiary_id}", response_model=BestiariesOut, tags=["bestiaries"])
+def update_bestiary(bestiary_id: int, bestiary: BestiariesUpdate):
     db = SessionLocal()
     db_bestiary = db.query(Bestiaries).filter(and_(Bestiaries.id == bestiary_id,
                                                    Bestiaries.author == bestiary.author)
@@ -89,7 +103,7 @@ def delete_bestiary(bestiary_id: int, bestiary: BestiariesUpdate):
 
 
 # Создание новой категории
-@app_v1.post("/categories/", response_model=CategoryOut)
+@app_v1.post("/categories/", response_model=CategoryOut, tags=["categories"])
 def create_category(category: CategoryCreate):
     db = SessionLocal()
     db_category = Category(**category.dict())
@@ -101,7 +115,7 @@ def create_category(category: CategoryCreate):
 
 
 # Получение списка всех категорий
-@app_v1.get("/categories/", response_model=List[CategoryOut])
+@app_v1.get("/categories/", response_model=List[CategoryOut], tags=["categories"])
 def read_categories(category: CategoryGetIn):
     # TODO тут проверка по jwt токен
     db = SessionLocal()
@@ -118,7 +132,7 @@ def read_categories(category: CategoryGetIn):
 
 
 # Получение категории по ID
-@app_v1.get("/categories/{category_id}", response_model=CategoryOut)
+@app_v1.get("/categories/{category_id}", response_model=CategoryOut, tags=["categories"])
 def read_category(category_id: int, category: CategoryGetIn):
     # TODO тут проверка по jwt токен
     db = SessionLocal()
@@ -132,8 +146,8 @@ def read_category(category_id: int, category: CategoryGetIn):
 
 
 # Удаление категории по ID
-@app_v1.delete("/categories/{category_id}", response_model=CategoryOut)
-def delete_bestiary(category_id: int, category: CategoryGetIn):
+@app_v1.delete("/categories/{category_id}", response_model=CategoryOut, tags=["categories"])
+def delete_category(category_id: int, category: CategoryGetIn):
     # TODO тут проверка по jwt токен
     db = SessionLocal()
     db_category = db.query(Category).filter(and_(Category.id == category_id,
@@ -149,8 +163,8 @@ def delete_bestiary(category_id: int, category: CategoryGetIn):
 
 
 # Изменение категории по ID
-@app_v1.put("/categories/{category_id}", response_model=CategoryOut)
-def delete_bestiary(category_id: int, category: CategoryUpdate):
+@app_v1.put("/categories/{category_id}", response_model=CategoryOut, tags=["categories"])
+def update_category(category_id: int, category: CategoryUpdate):
     # TODO тут проверка по jwt токен
     db = SessionLocal()
     db_category = db.query(Category).filter(and_(Category.id == category_id,
@@ -175,7 +189,7 @@ def delete_bestiary(category_id: int, category: CategoryUpdate):
 
 
 # Создание новой сущности
-@app_v1.post("/entities/", response_model=EntityOut)
+@app_v1.post("/entities/", response_model=EntityOut, tags=["entities"])
 def create_entity(entity: EntityCreate):
     db = SessionLocal()
     db_entity = Entity(**entity.dict())
@@ -187,7 +201,7 @@ def create_entity(entity: EntityCreate):
 
 
 # Получение списка всех сущностей
-@app_v1.get("/entities/", response_model=List[EntityOut])
+@app_v1.get("/entities/", response_model=List[EntityOut], tags=["entities"])
 def read_entities(entity: EntityGetIn):
     # TODO тут проверка по jwt токен
     db = SessionLocal()
@@ -204,7 +218,7 @@ def read_entities(entity: EntityGetIn):
 
 
 # Получение сущности по ID
-@app_v1.get("/entities/{entity_id}", response_model=EntityOut)
+@app_v1.get("/entities/{entity_id}", response_model=EntityOut, tags=["entities"])
 def read_entity(entity_id: int, entity: EntityGetIn):
     # TODO тут проверка по jwt токен
     db = SessionLocal()
@@ -218,8 +232,8 @@ def read_entity(entity_id: int, entity: EntityGetIn):
 
 
 # Удаление сущности по ID
-@app_v1.delete("/entities/{entity_id}", response_model=EntityOut)
-def delete_bestiary(entity_id: int, entity: EntityGetIn):
+@app_v1.delete("/entities/{entity_id}", response_model=EntityOut, tags=["entities"])
+def delete_entity(entity_id: int, entity: EntityGetIn):
     # TODO тут проверка по jwt токен
     db = SessionLocal()
     db_entity = db.query(Entity).filter(and_(Entity.id == entity_id,
@@ -235,8 +249,8 @@ def delete_bestiary(entity_id: int, entity: EntityGetIn):
 
 
 # Изменение категории по ID
-@app_v1.put("/entities/{entity_id}", response_model=EntityOut)
-def delete_bestiary(entity_id: int, entity: EntityUpdate):
+@app_v1.put("/entities/{entity_id}", response_model=EntityOut, tags=["entities"])
+def update_entity(entity_id: int, entity: EntityUpdate):
     # TODO тут проверка по jwt токен
     db = SessionLocal()
     db_entity = db.query(Entity).filter(and_(Entity.id == entity_id,

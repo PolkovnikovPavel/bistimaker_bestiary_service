@@ -5,11 +5,23 @@ from sqlalchemy import and_, or_
 from app.api.models import *   # Модели Pydantic для валидации данных
 
 
-app_debug = FastAPI()
+app_debug = FastAPI(
+    title="debug API",
+    description='''\tRU:
+\t\tВременная API исключительно для тестов и простого заполнения БД разными данными. Перед окончательным запуском приложения - удалить эту API
+
+\t\tУдаление настоящее без возможности восстановить записи!
+___
+
+\tEN:
+\t\tFUCK YOU
+    ''',
+    version="0.0.1",
+)
 
 
 # Создание нового бестиария
-@app_debug.post("/bestiaries/", response_model=BestiariesOut)
+@app_debug.post("/bestiaries/", response_model=BestiariesOut, tags=["bestiaries"])
 def create_bestiary(bestiary: BestiariesCreate):
     db = SessionLocal()
     db_bestiary = Bestiaries(**bestiary.dict())
@@ -21,7 +33,7 @@ def create_bestiary(bestiary: BestiariesCreate):
 
 
 # Получение списка всех бестиариев
-@app_debug.get("/bestiaries/", response_model=List[BestiariesOut])
+@app_debug.get("/bestiaries/", response_model=List[BestiariesOut], tags=["bestiaries"])
 def read_bestiaries():
     db = SessionLocal()
     bestiaries = db.query(Bestiaries).all()
@@ -30,7 +42,7 @@ def read_bestiaries():
 
 
 # Удаление бестиария по ID
-@app_debug.delete("/bestiaries/{bestiary_id}", response_model=BestiariesOut)
+@app_debug.delete("/bestiaries/{bestiary_id}", response_model=BestiariesOut, tags=["bestiaries"])
 def delete_bestiary(bestiary_id: int):
     db = SessionLocal()
     bestiary = db.query(Bestiaries).filter(Bestiaries.id == bestiary_id).first()
@@ -44,8 +56,8 @@ def delete_bestiary(bestiary_id: int):
 
 
 # Удаление ВСЕХ бестиариев
-@app_debug.delete("/bestiaries", response_model=str)
-def delete_bestiary():
+@app_debug.delete("/bestiaries", response_model=str, tags=["bestiaries"])
+def delete_all_bestiary():
     db = SessionLocal()
     bestiaries = db.query(Bestiaries).all()
     for bestiary in bestiaries:
@@ -59,7 +71,7 @@ def delete_bestiary():
 
 
 # Создание новой категории
-@app_debug.post("/categories/", response_model=CategoryOut)
+@app_debug.post("/categories/", response_model=CategoryOut, tags=["categories"])
 def create_category(category: CategoryCreate):
     db = SessionLocal()
     db_category = Category(**category.dict())
@@ -71,7 +83,7 @@ def create_category(category: CategoryCreate):
 
 
 # Получение списка всех категорий
-@app_debug.get("/categories/", response_model=List[CategoryOut])
+@app_debug.get("/categories/", response_model=List[CategoryOut], tags=["categories"])
 def read_categories():
     db = SessionLocal()
     categories = db.query(Category).all()
@@ -80,8 +92,8 @@ def read_categories():
 
 
 # Удаление категории по ID
-@app_debug.delete("/categories/{category_id}", response_model=CategoryOut)
-def delete_bestiary(category_id: int):
+@app_debug.delete("/categories/{category_id}", response_model=CategoryOut, tags=["categories"])
+def delete_category(category_id: int):
     db = SessionLocal()
     category = db.query(Category).filter(Category.id == category_id).first()
     if category is None:
@@ -94,8 +106,8 @@ def delete_bestiary(category_id: int):
 
 
 # Удаление ВСЕХ категорий
-@app_debug.delete("/categories/", response_model=str)
-def delete_bestiary():
+@app_debug.delete("/categories/", response_model=str, tags=["categories"])
+def delete_all_categories():
     db = SessionLocal()
     categories = db.query(Category).all()
     for category in categories:
@@ -109,7 +121,7 @@ def delete_bestiary():
 
 
 # Создание новой сущности
-@app_debug.post("/entities/", response_model=EntityOut)
+@app_debug.post("/entities/", response_model=EntityOut, tags=["entities"])
 def create_entity(entity: EntityCreate):
     db = SessionLocal()
     db_entity = Entity(**entity.dict())
@@ -121,7 +133,7 @@ def create_entity(entity: EntityCreate):
 
 
 # Получение списка всех сущностей
-@app_debug.get("/entities/", response_model=List[EntityOut])
+@app_debug.get("/entities/", response_model=List[EntityOut], tags=["entities"])
 def read_entities():
     db = SessionLocal()
     entities = db.query(Entity).all()
@@ -130,7 +142,7 @@ def read_entities():
 
 
 # Получение сущности по ID
-@app_debug.get("/entities/{entity_id}", response_model=EntityOut)
+@app_debug.get("/entities/{entity_id}", response_model=EntityOut, tags=["entities"])
 def read_entity(entity_id: int):
     db = SessionLocal()
     entity = db.query(Entity).filter(Entity.id == entity_id).first()
@@ -141,8 +153,8 @@ def read_entity(entity_id: int):
 
 
 # Удаление сущности по ID
-@app_debug.delete("/entities/{entity_id}", response_model=EntityOut)
-def delete_bestiary(entity_id: int):
+@app_debug.delete("/entities/{entity_id}", response_model=EntityOut, tags=["entities"])
+def delete_entity(entity_id: int):
     db = SessionLocal()
     entity = db.query(Entity).filter(Entity.id == entity_id).first()
     if entity is None:
@@ -155,8 +167,8 @@ def delete_bestiary(entity_id: int):
 
 
 # Удаление ВСЕХ сущностей
-@app_debug.delete("/entities", response_model=str)
-def delete_bestiary():
+@app_debug.delete("/entities", response_model=str, tags=["entities"])
+def delete_all_entities():
     db = SessionLocal()
     entities = db.query(Entity).all()
     for entity in entities:
