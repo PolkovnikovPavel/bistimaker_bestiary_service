@@ -4,6 +4,7 @@ import requests
 url = "http://127.0.0.1:8000/api/v1/entities/3"
 url = "http://217.71.129.139:4989/api/v1/entities/3"
 
+# TODO Сделать нормальные тесты
 
 data = {
     "author": 0,

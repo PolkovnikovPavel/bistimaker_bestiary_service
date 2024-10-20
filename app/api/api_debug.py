@@ -1,10 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from app.api.db import SessionLocal, Bestiaries, Category, Entity
 from sqlalchemy import and_, or_
+import time
 
 from app.api.models import *   # Модели Pydantic для валидации данных
-import redis
-import time
+from app.api.including_redis import *
 
 
 # Подключаемся к Redis
@@ -23,7 +23,7 @@ ___
 \tEN:
 \t\tFUCK YOU
     ''',
-    version="0.0.1",
+    version="0.0.2",
 )
 
 
@@ -36,6 +36,7 @@ def create_bestiary(bestiary: BestiariesCreate):
     db.commit()
     db.refresh(db_bestiary)
     db.close()
+    delete_cache_from_redis('all_bestiaries', '')
     return db_bestiary
 
 
@@ -43,24 +44,15 @@ def create_bestiary(bestiary: BestiariesCreate):
 @app_debug.get("/bestiaries/", response_model=List[BestiariesOut], tags=["bestiaries"])
 def read_bestiaries():
 
-    timer = time.time()
-    cached_data = redis_client.get(f'all_bestiaries')
+    cached_data = get_cache_from_redis('all_bestiaries', '')
     if cached_data:
-        print('cache', time.time() - timer)
-        bestiaries = eval(cached_data)
-    else:
-        timer = time.time()
-        db = SessionLocal()
-        bestiaries = db.query(Bestiaries).all()
-        db.close()
-        print('load DB', time.time() - timer)
-        # Кэшируем данные
-        bestiaries_dicts = [
-            {key: value for key, value in user.__dict__.items() if key != '_sa_instance_state'}
-            for user in bestiaries
-        ]
-        redis_client.setex(f'all_bestiaries', 60, str(bestiaries_dicts))
+        return cached_data
 
+    db = SessionLocal()
+    bestiaries = db.query(Bestiaries).all()
+    db.close()
+
+    set_cache('all_bestiaries', '', bestiaries)
     return bestiaries
 
 
@@ -97,7 +89,8 @@ def delete_all_bestiary():
 @app_debug.post("/categories/", response_model=CategoryOut, tags=["categories"])
 def create_category(category: CategoryCreate):
     db = SessionLocal()
-    db_category = Category(**category.dict())
+    category_dict = {k: v for k, v in category.dict().items() if k != "author"}
+    db_category = Category(**category_dict)
     db.add(db_category)
     db.commit()
     db.refresh(db_category)

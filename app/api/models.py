@@ -37,6 +37,8 @@ class CategoryGetIn(BaseModel):
 
 
 class CategoryCreate(BaseModel):
+    author: int
+
     bestiaries_id: int
     name: str
     background_img: str
@@ -64,6 +66,8 @@ class CategoryUpdate(BaseModel):
 
 
 class EntityCreate(BaseModel):
+    author: int
+
     bestiaries_id: int
     name: str
     description: str

@@ -7,7 +7,7 @@ url = "http://217.71.129.139:4989/bestiaries-service/api/debug/bestiaries/"
 # url = "http://bistimaker.ru/bestiaries-service/api/debug/bestiaries"
 
 
-# response = requests.delete("http://127.0.0.1:8000/api/debug/bestiaries")
+# response = requests.delete("http://localhost:6102/bestiaries-service/api/debug/bestiaries")
 # print(response.json())
 
 timer = time.time()
@@ -33,6 +33,8 @@ else:
 # }
 # response = requests.post(url, json=data)
 # print(response.json())
+
+
 #
 #
 # data = {
