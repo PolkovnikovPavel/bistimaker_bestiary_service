@@ -3,6 +3,13 @@ from app.api.db import SessionLocal, Bestiaries, Category, Entity
 from sqlalchemy import and_, or_
 
 from app.api.models import *   # Модели Pydantic для валидации данных
+import redis
+import time
+
+
+# Подключаемся к Redis
+# redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
 
 
 app_debug = FastAPI(
@@ -35,9 +42,25 @@ def create_bestiary(bestiary: BestiariesCreate):
 # Получение списка всех бестиариев
 @app_debug.get("/bestiaries/", response_model=List[BestiariesOut], tags=["bestiaries"])
 def read_bestiaries():
-    db = SessionLocal()
-    bestiaries = db.query(Bestiaries).all()
-    db.close()
+
+    timer = time.time()
+    cached_data = redis_client.get(f'all_bestiaries')
+    if cached_data:
+        print('cache', time.time() - timer)
+        bestiaries = eval(cached_data)
+    else:
+        timer = time.time()
+        db = SessionLocal()
+        bestiaries = db.query(Bestiaries).all()
+        db.close()
+        print('load DB', time.time() - timer)
+        # Кэшируем данные
+        bestiaries_dicts = [
+            {key: value for key, value in user.__dict__.items() if key != '_sa_instance_state'}
+            for user in bestiaries
+        ]
+        redis_client.setex(f'all_bestiaries', 60, str(bestiaries_dicts))
+
     return bestiaries
 
 

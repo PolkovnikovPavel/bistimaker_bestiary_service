@@ -1,3 +1,9 @@
+redis:
+docker network ls
+docker network create redis-network
+docker run --name redis -d --network redis-network -p 6379:6379 redis
+
+
 
 на винде:
 
@@ -11,12 +17,15 @@ docker push setorg/bestiary_service:latest
 
 docker ps
 docker stop bestiary_service
-docker container prune
-docker images
-docker pull setorg/bestiary_service:latest
-docker rmi fa813ed7c2bd
+docker rm bestiary_service
 
-docker run -d --name bestiary_service -p 6100:6100 setorg/bestiary_service:latest
+docker images
+docker tag setorg/bestiary_service:latest setorg/bestiary_service:old
+docker rmi setorg/bestiary_service:latest
+docker pull setorg/bestiary_service:latest
+docker rmi setorg/bestiary_service:old
+
+docker run -d --name bestiary_service --network redis-network -p 6100:6100 setorg/bestiary_service:latest
 
 docker ps
 docker logs bestiary_service
