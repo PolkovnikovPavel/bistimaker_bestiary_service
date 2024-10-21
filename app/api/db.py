@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Boolean, and_, or_
+from sqlalchemy import create_engine, Column, Integer, Float, String, ForeignKey, DateTime, Boolean, and_, or_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from datetime import datetime
@@ -28,6 +28,8 @@ class Bestiaries(Base):
     latest_update = Column(DateTime, onupdate=datetime.utcnow, default=datetime.utcnow)
     is_star = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
+    average_rating = Column(Float, default=0.0)  # Новое поле
+    count_views = Column(Integer, default=0)  # Новое поле
 
     categories = relationship("Category", back_populates="bestiaries")
     entities = relationship("Entity", back_populates="bestiaries")
@@ -74,17 +76,19 @@ if __name__ == "__main__":
     db = SessionLocal()
 
     # Пример создания нового бестиария
-    new_bestiary = Bestiaries(name="My Bestiary", author=0)
+    new_bestiary = Bestiaries(name="My Bestiary", author=0, average_rating=4.5, count_views=100)
     db.add(new_bestiary)
     db.commit()
 
     # Пример создания новой категории
-    new_category = Category(bestiaries_id=new_bestiary.id, name="Monsters", background_img="monsters.jpg", background_color="#FF0000")
+    new_category = Category(bestiaries_id=new_bestiary.id, name="Monsters", background_img="monsters.jpg",
+                            background_color="#FF0000")
     db.add(new_category)
     db.commit()
 
     # Пример создания новой сущности
-    new_entity = Entity(bestiaries_id=new_bestiary.id, name="Dragon", description="A fire-breathing creature", category_id=new_category.id, img_name="dragon.jpg", background_color="#00FF00")
+    new_entity = Entity(bestiaries_id=new_bestiary.id, name="Dragon", description="A fire-breathing creature",
+                        category_id=new_category.id, img_name="dragon.jpg", background_color="#00FF00")
     db.add(new_entity)
     db.commit()
 

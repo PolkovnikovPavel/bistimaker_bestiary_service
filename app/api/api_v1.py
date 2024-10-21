@@ -107,7 +107,7 @@ def update_bestiary(bestiary_id: int, bestiary: BestiariesUpdate):
         db.close()
         raise HTTPException(status_code=404, detail="Bestiary not found")
     for key, value in bestiary.dict().items():
-        if key == 'author':
+        if key == 'author' or key == 'average_rating' or key == 'count_views':
             continue
         if value is not None and hasattr(Bestiaries, key):
             setattr(db_bestiary, key, value)
@@ -135,7 +135,7 @@ def create_category(category: CategoryCreate):
     db.refresh(db_category)
     db.close()
 
-    delete_cache_from_redis('all_categories', str(category.author))
+    delete_cache_from_redis(f'all_categories_{category.bestiaries_id}', str(category.author))
     return db_category
 
 
@@ -156,7 +156,7 @@ def read_categories(category: CategoryGetIn):
     categories = db.query(Category).filter(Category.bestiaries_id == category.bestiaries_id).all()
     db.close()
 
-    set_cache('all_categories', str(category.author), categories)
+    set_cache(f'all_categories_{category.bestiaries_id}', str(category.author), categories)
     return categories
 
 
@@ -192,7 +192,7 @@ def delete_category(category_id: int, category: CategoryGetIn):
     db.commit()
     db.close()
 
-    delete_cache_from_redis('all_categories', str(category.author))
+    delete_cache_from_redis(f'all_categories_{category.bestiaries_id}', str(category.author))
     delete_cache_from_redis(f'category_{category.author}', str(category_id))
     return db_category
 
@@ -217,7 +217,7 @@ def update_category(category_id: int, category: CategoryUpdate):
     db.refresh(db_category)
     db.close()
 
-    delete_cache_from_redis('all_categories', str(category.author))
+    delete_cache_from_redis(f'all_categories_{category.bestiaries_id}', str(category.author))
     delete_cache_from_redis(f'category_{category.author}', str(category_id))
     return db_category
 
@@ -236,7 +236,7 @@ def create_entity(entity: EntityCreate):
     db.refresh(db_entity)
     db.close()
 
-    delete_cache_from_redis('all_entities', str(entity.author))
+    delete_cache_from_redis(f'all_entities_{entity.bestiaries_id}', str(entity.author))
     return db_entity
 
 
@@ -257,7 +257,7 @@ def read_entities(entity: EntityGetIn):
     entities = db.query(Entity).filter(Entity.bestiaries_id == entity.bestiaries_id).all()
     db.close()
 
-    set_cache('all_entities', str(entity.author), entities)
+    set_cache(f'all_entities_{entity.bestiaries_id}', str(entity.author), entities)
     return entities
 
 
@@ -293,7 +293,7 @@ def delete_entity(entity_id: int, entity: EntityGetIn):
     db.commit()
     db.close()
 
-    delete_cache_from_redis('all_entities', str(entity.author))
+    delete_cache_from_redis(f'all_entities_{entity.bestiaries_id}', str(entity.author))
     delete_cache_from_redis(f'entity_{entity.author}', str(entity_id))
     return db_entity
 
@@ -319,6 +319,6 @@ def update_entity(entity_id: int, entity: EntityUpdate):
     db.refresh(db_entity)
     db.close()
 
-    delete_cache_from_redis('all_entities', str(entity.author))
+    delete_cache_from_redis(f'all_entities_{entity.bestiaries_id}', str(entity.author))
     delete_cache_from_redis(f'entity_{entity.author}', str(entity_id))
     return db_entity

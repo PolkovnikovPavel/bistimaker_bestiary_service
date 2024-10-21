@@ -6,7 +6,7 @@ url = "http://217.71.129.139:4989/bestiaries-service/api/v1/"
 author = 0
 
 response = requests.get(url + 'bestiaries/', json={"author": author})
-b_id = response.json()[0]['id']
+b_id = response.json()[-1]['id']
 print('Для бестиария с id =', b_id)
 
 

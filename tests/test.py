@@ -24,14 +24,21 @@ cur = conn.cursor()
 # cur.execute('DELETE FROM entities WHERE id = 1;')
 # conn.commit()
 
-cur.execute('select * from entities;')
+cur.execute('select * from bestiaries;')
 result = cur.fetchall()
 print(*result, sep='\n')
 
 
+# cur.execute('''ALTER TABLE bestiaries
+# ADD COLUMN average_rating FLOAT DEFAULT 0.0,
+# ADD COLUMN count_views INTEGER DEFAULT 0;''')
+# conn.commit()
+
+
+
 # cur.execute('DROP TABLE entities;')
 # cur.execute('DROP TABLE categories;')
-# cur.execute('DROP TABLE users;')
+# cur.execute('DROP TABLE bestiaries;')
 # conn.commit()
 
 
