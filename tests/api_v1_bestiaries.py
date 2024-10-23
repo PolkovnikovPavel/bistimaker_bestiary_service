@@ -1,16 +1,21 @@
 import requests
 
 
-url = "http://127.0.0.1:6101/bestiaries-service/api/v1/bestiaries/"
-url = "http://217.71.129.139:4989/bestiaries-service/api/v1/bestiaries/"
+url = "http://127.0.0.1:6102/bestiaries-service/api/v1/bestiaries/6"
+url = "http://217.71.129.139:4989/bestiaries-service/api/v1/bestiaries/6"
 
 # TODO Сделать нормальные тесты
 
 data = {
-    "author": 0
+    "author": 1
 }
 response = requests.get(url, json=data)
-print(response.json())
+try:
+    print(response.json())
+except Exception:
+    print(response)
+
+
 
 # data = {
 #     "author": 1,

@@ -30,8 +30,7 @@ print(*result, sep='\n')
 
 
 # cur.execute('''ALTER TABLE bestiaries
-# ADD COLUMN average_rating FLOAT DEFAULT 0.0,
-# ADD COLUMN count_views INTEGER DEFAULT 0;''')
+# ADD COLUMN is_published BOOLEAN DEFAULT FALSE;''')
 # conn.commit()
 
 

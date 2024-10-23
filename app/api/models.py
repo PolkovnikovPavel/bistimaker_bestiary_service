@@ -20,6 +20,8 @@ class BestiariesOut(BaseModel):
     date_creation: datetime.datetime
     latest_update: datetime.datetime
     is_star: bool
+    average_rating: float
+    count_views: int
 
 
 class BestiariesUpdate(BaseModel):

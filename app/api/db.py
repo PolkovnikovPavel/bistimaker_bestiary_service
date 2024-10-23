@@ -28,8 +28,9 @@ class Bestiaries(Base):
     latest_update = Column(DateTime, onupdate=datetime.utcnow, default=datetime.utcnow)
     is_star = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
-    average_rating = Column(Float, default=0.0)  # Новое поле
-    count_views = Column(Integer, default=0)  # Новое поле
+    is_published = Column(Boolean, default=False)
+    average_rating = Column(Float, default=0.0)
+    count_views = Column(Integer, default=0)
 
     categories = relationship("Category", back_populates="bestiaries")
     entities = relationship("Entity", back_populates="bestiaries")

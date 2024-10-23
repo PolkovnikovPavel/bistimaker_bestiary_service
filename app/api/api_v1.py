@@ -19,7 +19,7 @@ ___
 
 \t\tDeleting bestiaries does not erase the data at all, but it is impossible to restore them using this API.
     ''',
-    version="1.2.0",
+    version="1.3.0",
 )
 
 
@@ -61,19 +61,24 @@ def read_bestiaries(bestiary: BestiariesGetIn):
 # Получение бестиария по ID
 @app_v1.get("/bestiaries/{bestiary_id}", response_model=BestiariesOut, tags=["bestiaries"])
 def read_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
-    cached_data = get_cache_from_redis(f'bestiary_{bestiary.author}', str(bestiary_id))
-    if cached_data:
-        return cached_data
+    # cached_data = get_cache_from_redis(f'bestiary_{bestiary.author}', str(bestiary_id))
+    # if cached_data:
+    #     return cached_data
     db = SessionLocal()
     db_bestiary = db.query(Bestiaries).filter(and_(Bestiaries.id == bestiary_id,
                                                    Bestiaries.author == bestiary.author,
                                                    Bestiaries.is_deleted == False)
                                               ).first()
-    db.close()
     if db_bestiary is None:
+        db.close()
         raise HTTPException(status_code=404, detail="Bestiary not found")
+    db_bestiary.count_views += 1
+    db.commit()
+    db.refresh(db_bestiary)
+    db.close()
 
     set_cache(f'bestiary_{bestiary.author}', str(bestiary_id), db_bestiary)
+
     return db_bestiary
 
 
@@ -89,6 +94,7 @@ def delete_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
         raise HTTPException(status_code=404, detail="Bestiary not found")
     db_bestiary.is_deleted = True
     db.commit()
+    db.refresh(db_bestiary)
     db.close()
 
     delete_cache_from_redis('all_bestiaries', str(bestiary.author))
