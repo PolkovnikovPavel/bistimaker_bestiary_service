@@ -5,12 +5,12 @@ from typing import List, Optional
 
 
 class BestiariesGetIn(BaseModel):
-    author: int
+    token: str
 
 
 class BestiariesCreate(BaseModel):
     name: str
-    author: int
+    token: str
 
 
 class BestiariesOut(BaseModel):
@@ -25,7 +25,7 @@ class BestiariesOut(BaseModel):
 
 
 class BestiariesUpdate(BaseModel):
-    author: int
+    token: str
     name: Optional[str] = None
     is_star: Optional[bool] = None
 
@@ -34,12 +34,12 @@ class BestiariesUpdate(BaseModel):
 
 
 class CategoryGetIn(BaseModel):
-    author: int
+    token: str
     bestiaries_id: int
 
 
 class CategoryCreate(BaseModel):
-    author: int
+    token: str
 
     bestiaries_id: int
     name: str
@@ -56,7 +56,7 @@ class CategoryOut(BaseModel):
 
 
 class CategoryUpdate(BaseModel):
-    author: int
+    token: str
     bestiaries_id: int
 
     name: Optional[str] = None
@@ -68,7 +68,7 @@ class CategoryUpdate(BaseModel):
 
 
 class EntityCreate(BaseModel):
-    author: int
+    token: str
 
     bestiaries_id: int
     name: str
@@ -79,7 +79,7 @@ class EntityCreate(BaseModel):
 
 
 class EntityGetIn(BaseModel):
-    author: int
+    token: str
     bestiaries_id: int
 
 
@@ -94,7 +94,7 @@ class EntityOut(BaseModel):
 
 
 class EntityUpdate(BaseModel):
-    author: int
+    token: str
     bestiaries_id: int
 
     name: Optional[str] = None

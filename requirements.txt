@@ -6,3 +6,4 @@ pydantic==2.9.2
 fastapi[standard]==0.114.0
 psycopg2==2.9.9
 redis==5.1.1
+requests==2.31.0

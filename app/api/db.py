@@ -30,7 +30,10 @@ class Bestiaries(Base):
     is_deleted = Column(Boolean, default=False)
     is_published = Column(Boolean, default=False)
     average_rating = Column(Float, default=0.0)
+    rang = Column(Float, default=0.0)
     count_views = Column(Integer, default=0)
+    src_icon = Column(String, default='/download/default-bestiary-icon.png')
+    src_background_img = Column(String, default='')
 
     categories = relationship("Category", back_populates="bestiaries")
     entities = relationship("Entity", back_populates="bestiaries")
@@ -77,7 +80,7 @@ if __name__ == "__main__":
     db = SessionLocal()
 
     # Пример создания нового бестиария
-    new_bestiary = Bestiaries(name="My Bestiary", author=0, average_rating=4.5, count_views=100)
+    new_bestiary = Bestiaries(name="My Bestiary", author=0, average_rating=4.5, count_views=30)
     db.add(new_bestiary)
     db.commit()
 
