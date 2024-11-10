@@ -6,7 +6,8 @@ docker run --name redis -d --network redis-network -p 6379:6379 redis
 
 
 на винде:
-
+g:
+cd G:\Другие компьютеры\Ноутбук\python\all_servers\bistimaker\bestiary_service
 docker login
 docker-compose up -d
 docker tag bestiary_service-bestiary_service:latest setorg/bestiary_service:latest

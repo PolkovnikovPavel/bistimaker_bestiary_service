@@ -4,13 +4,8 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 
-class BestiariesGetIn(BaseModel):
-    token: str
-
-
 class BestiariesCreate(BaseModel):
     name: str
-    token: str
 
 
 class BestiariesOut(BaseModel):
@@ -22,25 +17,27 @@ class BestiariesOut(BaseModel):
     is_star: bool
     average_rating: float
     count_views: int
+    src_icon: str
+    src_background_img: str
+    description: str
 
 
 class BestiariesUpdate(BaseModel):
-    token: str
     name: Optional[str] = None
     is_star: Optional[bool] = None
+    src_icon: Optional[str] = None
+    src_background_img: Optional[str] = None
+    description: Optional[str] = None
 
 
 # ___________________________ categories ________________________________
 
 
 class CategoryGetIn(BaseModel):
-    token: str
     bestiaries_id: int
 
 
 class CategoryCreate(BaseModel):
-    token: str
-
     bestiaries_id: int
     name: str
     background_img: str
@@ -56,7 +53,6 @@ class CategoryOut(BaseModel):
 
 
 class CategoryUpdate(BaseModel):
-    token: str
     bestiaries_id: int
 
     name: Optional[str] = None
@@ -68,8 +64,6 @@ class CategoryUpdate(BaseModel):
 
 
 class EntityCreate(BaseModel):
-    token: str
-
     bestiaries_id: int
     name: str
     description: str
@@ -79,7 +73,6 @@ class EntityCreate(BaseModel):
 
 
 class EntityGetIn(BaseModel):
-    token: str
     bestiaries_id: int
 
 
@@ -94,7 +87,6 @@ class EntityOut(BaseModel):
 
 
 class EntityUpdate(BaseModel):
-    token: str
     bestiaries_id: int
 
     name: Optional[str] = None

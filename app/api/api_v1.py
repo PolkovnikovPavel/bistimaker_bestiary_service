@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Query
 from app.api.db import SessionLocal, Bestiaries, Category, Entity
 from sqlalchemy import and_, or_
 
@@ -16,7 +16,7 @@ app_v1 = FastAPI(
 
 \t\tУдаление бестиариев не стирает данные насовсем, но восстановить их с помощью API невозможно.
 
-\t\tДля всех методов требуется действующий токен аутентификации.
+\t\tДля всех методов требуется действующий Bearer токен аутентификации переданный в Header по ключу Authorization.
 ___
 
 \tEN:
@@ -24,7 +24,7 @@ ___
 
 \t\tDeleting bestiaries does not erase the data at all, but it is impossible to restore them using this API.
     ''',
-    version="2.0.0",
+    version="2.1.0",
 )
 
 
@@ -35,10 +35,17 @@ def get_user_id_by_token(token):
     return response.json()['id']
 
 
+def get_token(authorization):
+    if authorization is None:
+        raise HTTPException(status_code=403, detail="Authorization header is required")
+    token = authorization.split('Bearer ')[1] if "Bearer " in authorization else ''
+    return token
+
+
 # Создание нового бестиария
 @app_v1.post("/bestiaries/", response_model=BestiariesOut, tags=["bestiaries"])
-def create_bestiary(bestiary: BestiariesCreate):
-    author = get_user_id_by_token(bestiary.token)
+def create_bestiary(bestiary: BestiariesCreate, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     db = SessionLocal()
     db_bestiary = Bestiaries(author=author, **bestiary.dict(exclude={"token"}))
@@ -53,13 +60,8 @@ def create_bestiary(bestiary: BestiariesCreate):
 
 # Получение списка всех бестиариев для пользователя
 @app_v1.get("/bestiaries/", response_model=List[BestiariesOut], tags=["bestiaries"])
-def read_bestiaries(bestiary: BestiariesGetIn):
-    # TODO удалить этот вывод ключей
-    all_keys = redis_client.keys('*')
-    for key in all_keys:
-        print(key.decode('utf-8'))
-
-    author = get_user_id_by_token(bestiary.token)
+def read_bestiaries(authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     cached_data = get_cache_from_redis('all_bestiaries', str(author))
     if cached_data:
@@ -76,8 +78,8 @@ def read_bestiaries(bestiary: BestiariesGetIn):
 
 # Получение бестиария по ID
 @app_v1.get("/bestiaries/{bestiary_id}", response_model=BestiariesOut, tags=["bestiaries"])
-def read_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
-    author = get_user_id_by_token(bestiary.token)
+def read_bestiary(bestiary_id: int, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     cached_data = get_cache_from_redis(f'bestiary_{author}', str(bestiary_id))
     if cached_data:
@@ -101,9 +103,9 @@ def read_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
 
 
 # Удаление бестиария по ID
-@app_v1.delete("/bestiaries/{bestiary_id}", response_model=BestiariesCreate, tags=["bestiaries"])
-def delete_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
-    author = get_user_id_by_token(bestiary.token)
+@app_v1.delete("/bestiaries/{bestiary_id}", response_model=BestiariesOut, tags=["bestiaries"])
+def delete_bestiary(bestiary_id: int, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     db = SessionLocal()
     db_bestiary = db.query(Bestiaries).filter(and_(Bestiaries.id == bestiary_id,
@@ -124,8 +126,8 @@ def delete_bestiary(bestiary_id: int, bestiary: BestiariesGetIn):
 
 # Изменение бестиария по ID
 @app_v1.put("/bestiaries/{bestiary_id}", response_model=BestiariesOut, tags=["bestiaries"])
-def update_bestiary(bestiary_id: int, bestiary: BestiariesUpdate):
-    author = get_user_id_by_token(bestiary.token)
+def update_bestiary(bestiary_id: int, bestiary: BestiariesUpdate, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     db = SessionLocal()
     db_bestiary = db.query(Bestiaries).filter(and_(Bestiaries.id == bestiary_id,
@@ -152,8 +154,8 @@ def update_bestiary(bestiary_id: int, bestiary: BestiariesUpdate):
 
 # Создание новой категории
 @app_v1.post("/categories/", response_model=CategoryOut, tags=["categories"])
-def create_category(category: CategoryCreate):
-    author = get_user_id_by_token(category.token)
+def create_category(category: CategoryCreate, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     db = SessionLocal()
     category_dict = {k: v for k, v in category.dict().items() if k != "token"}
@@ -169,8 +171,11 @@ def create_category(category: CategoryCreate):
 
 # Получение списка всех категорий
 @app_v1.get("/categories/", response_model=List[CategoryOut], tags=["categories"])
-def read_categories(category: CategoryGetIn):
-    author = get_user_id_by_token(category.token)
+def read_categories(
+        bestiaries_id: int = Query(..., description="id соответствующего бестиария"),
+        authorization: Optional[str] = Header(None)):
+    category = CategoryGetIn(bestiaries_id=bestiaries_id)
+    author = get_user_id_by_token(get_token(authorization))
 
     cached_data = get_cache_from_redis('all_categories', str(author))
     if cached_data:
@@ -192,8 +197,12 @@ def read_categories(category: CategoryGetIn):
 
 # Получение категории по ID
 @app_v1.get("/categories/{category_id}", response_model=CategoryOut, tags=["categories"])
-def read_category(category_id: int, category: CategoryGetIn):
-    author = get_user_id_by_token(category.token)
+def read_category(
+        category_id: int,
+        bestiaries_id: int = Query(..., description="id соответствующего бестиария"),
+        authorization: Optional[str] = Header(None)):
+    category = CategoryGetIn(bestiaries_id=bestiaries_id)
+    author = get_user_id_by_token(get_token(authorization))
 
     cached_data = get_cache_from_redis(f'category_{author}', str(category_id))
     if cached_data:
@@ -212,8 +221,8 @@ def read_category(category_id: int, category: CategoryGetIn):
 
 # Удаление категории по ID
 @app_v1.delete("/categories/{category_id}", response_model=CategoryOut, tags=["categories"])
-def delete_category(category_id: int, category: CategoryGetIn):
-    author = get_user_id_by_token(category.token)
+def delete_category(category_id: int, category: CategoryGetIn, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     db = SessionLocal()
     db_category = db.query(Category).filter(and_(Category.id == category_id,
@@ -233,8 +242,8 @@ def delete_category(category_id: int, category: CategoryGetIn):
 
 # Изменение категории по ID
 @app_v1.put("/categories/{category_id}", response_model=CategoryOut, tags=["categories"])
-def update_category(category_id: int, category: CategoryUpdate):
-    author = get_user_id_by_token(category.token)
+def update_category(category_id: int, category: CategoryUpdate, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     db = SessionLocal()
     db_category = db.query(Category).filter(and_(Category.id == category_id,
@@ -263,8 +272,8 @@ def update_category(category_id: int, category: CategoryUpdate):
 
 # Создание новой сущности
 @app_v1.post("/entities/", response_model=EntityOut, tags=["entities"])
-def create_entity(entity: EntityCreate):
-    author = get_user_id_by_token(entity.token)
+def create_entity(entity: EntityCreate, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     db = SessionLocal()
     entity_dict = {k: v for k, v in entity.dict().items() if k != "token"}
@@ -280,8 +289,11 @@ def create_entity(entity: EntityCreate):
 
 # Получение списка всех сущностей
 @app_v1.get("/entities/", response_model=List[EntityOut], tags=["entities"])
-def read_entities(entity: EntityGetIn):
-    author = get_user_id_by_token(entity.token)
+def read_entities(
+        bestiaries_id: int = Query(..., description="id соответствующего бестиария"),
+        authorization: Optional[str] = Header(None)):
+    entity = EntityGetIn(bestiaries_id=bestiaries_id)
+    author = get_user_id_by_token(get_token(authorization))
 
     cached_data = get_cache_from_redis('all_categories', str(author))
     if cached_data:
@@ -303,8 +315,12 @@ def read_entities(entity: EntityGetIn):
 
 # Получение сущности по ID
 @app_v1.get("/entities/{entity_id}", response_model=EntityOut, tags=["entities"])
-def read_entity(entity_id: int, entity: EntityGetIn):
-    author = get_user_id_by_token(entity.token)
+def read_entity(
+        entity_id: int,
+        bestiaries_id: int = Query(..., description="id соответствующего бестиария"),
+        authorization: Optional[str] = Header(None)):
+    entity = EntityGetIn(bestiaries_id=bestiaries_id)
+    author = get_user_id_by_token(get_token(authorization))
 
     cached_data = get_cache_from_redis(f'entity_{author}', str(entity_id))
     if cached_data:
@@ -323,8 +339,8 @@ def read_entity(entity_id: int, entity: EntityGetIn):
 
 # Удаление сущности по ID
 @app_v1.delete("/entities/{entity_id}", response_model=EntityOut, tags=["entities"])
-def delete_entity(entity_id: int, entity: EntityGetIn):
-    author = get_user_id_by_token(entity.token)
+def delete_entity(entity_id: int, entity: EntityGetIn, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     db = SessionLocal()
     db_entity = db.query(Entity).filter(and_(Entity.id == entity_id,
@@ -344,8 +360,8 @@ def delete_entity(entity_id: int, entity: EntityGetIn):
 
 # Изменение категории по ID
 @app_v1.put("/entities/{entity_id}", response_model=EntityOut, tags=["entities"])
-def update_entity(entity_id: int, entity: EntityUpdate):
-    author = get_user_id_by_token(entity.token)
+def update_entity(entity_id: int, entity: EntityUpdate, authorization: Optional[str] = Header(None)):
+    author = get_user_id_by_token(get_token(authorization))
 
     db = SessionLocal()
     db_entity = db.query(Entity).filter(and_(Entity.id == entity_id,

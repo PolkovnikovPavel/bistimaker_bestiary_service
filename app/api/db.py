@@ -34,6 +34,7 @@ class Bestiaries(Base):
     count_views = Column(Integer, default=0)
     src_icon = Column(String, default='/download/default-bestiary-icon.png')
     src_background_img = Column(String, default='')
+    description = Column(String, default='')
 
     categories = relationship("Category", back_populates="bestiaries")
     entities = relationship("Entity", back_populates="bestiaries")
