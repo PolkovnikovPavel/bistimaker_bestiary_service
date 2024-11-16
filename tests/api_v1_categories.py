@@ -3,7 +3,7 @@ import time
 
 # url = "http://127.0.0.1:6101/bestiaries-service/api/v1/"
 url = "http://217.71.129.139:4989/bestiaries-service/api/v1/"
-token = 'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUk9MRV9VU0VSIiwiaWQiOjMwLCJlbWFpbCI6InBhdmVscG9sa292bmlrb3YzMzRAZ21haWwuY29tIiwic3ViIjoicGF2ZWwiLCJpYXQiOjE3MzEyNTc3MDcsImV4cCI6MTczMTQwMTcwN30.-2UtZ2FXQvANCN8FgTfttRsrDQs1AKeZ4RDpG1yj16g'
+token = 'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUk9MRV9VU0VSIiwiaWQiOjMwLCJlbWFpbCI6InBhdmVscG9sa292bmlrb3YzMzRAZ21haWwuY29tIiwic3ViIjoicGF2ZWwiLCJpYXQiOjE3MzE3NDc4NjUsImV4cCI6MTczMTg5MTg2NX0.7TMHRBqx7_lmIQWUK48AAnBMhSnXvRwbxYTRn6Q4Ve4'
 
 headers = {
     'Authorization': f'Bearer {token}',

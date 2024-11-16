@@ -5,6 +5,7 @@ import time
 
 from app.api.models import *   # Модели Pydantic для валидации данных
 from app.api.including_redis import *
+from app.api.including_ligging import init_loger
 
 
 # Подключаемся к Redis
@@ -23,8 +24,10 @@ ___
 \tEN:
 \t\tFUCK YOU
     ''',
-    version="0.0.2",
+    version="0.0.3",
 )
+
+logger = init_loger(app_debug, 'debug_api')
 
 
 # Создание нового бестиария

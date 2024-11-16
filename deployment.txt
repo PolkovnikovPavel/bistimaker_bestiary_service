@@ -26,7 +26,7 @@ docker rmi setorg/bestiary_service:latest
 docker pull setorg/bestiary_service:latest
 docker rmi setorg/bestiary_service:old
 
-docker run -d --name bestiary_service --network redis-network -p 6100:6100 setorg/bestiary_service:latest
+docker run -d --name bestiary_service --network redis-network -p 6100:6100 -v /usr/local/logs/bestiary-service-logs:/app/app/logs setorg/bestiary_service:latest
 
 docker ps
 docker logs bestiary_service
